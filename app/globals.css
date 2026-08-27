@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* ============================================================
+   KARYALO DESIGN SYSTEM — design tokens (Tailwind v4 CSS-first)
+   ============================================================
+   Sumber ASLI: KaryaLo_Project/07_DESIGN/Design_System/Karyalo_Design_System.md
+   §2 Color Tokens, §3 Typography, §4 Layout & Spacing, §7 Responsive.
+
+   UPDATE 16 Agustus 2026 — palet warna diganti dari hijau ("Soft Pine")
+   ke biru, supaya cocok dengan logo asli (07_DESIGN/Logo/logo_karyalo.png)
+   yang baru diterima: pita gradasi navy -> royal blue -> cyan berbentuk
+   "K". Palet hijau sebelumnya adalah placeholder sebelum ada logo nyata.
+   Nama token (--color-deep-pine, --color-karyalo-green, dst.) SENGAJA
+   TIDAK diganti — hanya nilai hex-nya — supaya seluruh komponen yang
+   sudah memakai class ini (bg-deep-pine, text-karyalo-green, dst.) tidak
+   perlu diedit satu per satu dan tidak ada risiko class yang putus tanpa
+   ketahuan (sandbox ini tidak bisa build-test, lihat README). Anggap nama
+   token di bawah sebagai "slot", bukan deskripsi warna literal lagi:
+     - deep-pine   = Brand Navy (paling gelap, dari ekor pita logo)
+     - karyalo-green = Brand Royal Blue (warna utama CTA/link/active state)
+     - accent-cyan (BARU) = aksen tercerah dari ujung pita logo
+   Rasio kontras WCAG sudah dihitung ulang untuk kombinasi yang dipakai
+   di Fase 1 (lihat catatan per-baris) — tapi verifikasi penuh per
+   komponen baru tetap TODO begitu komponen Fase 2+ mulai dibangun,
+   sama seperti gap yang sudah dicatat Design System sumber (§5, §9).
+   ============================================================ */
+
+@theme {
+  /* --- Color tokens — logo-matched, 16 Agustus 2026 --- */
+  --color-deep-pine: #1e2f5c; /* Brand Navy — header/footer gelap, heading; vs Warm White = 12.55:1 */
+  --color-karyalo-green: #1e5aa8; /* Brand Royal Blue — CTA utama/link/focus ring; vs Warm White = 6.58:1, teks putih di atasnya = 6.81:1 */
+  --color-accent-cyan: #2fc1d6; /* BARU — aksen tercerah dari logo. HANYA untuk elemen dekoratif/ikon/badge-bg, JANGAN untuk teks di atas latar terang (kontras cuma ~2.1:1, gagal AA) */
+  --color-ink: #1c2430; /* Body / heading on light — sedikit lebih dingin dari sebelumnya, vs Warm White = 15.09:1 */
+  --color-muted: #5b6472; /* Secondary copy — vs Warm White = 5.78:1 */
+  --color-warm-white: #fcfbf7; /* Primary page background — TIDAK diubah (kontras hangat vs brand biru dingin, disengaja) */
+  --color-soft-sand: #f4f1ea; /* Alternate section / pricing / proof — tidak diubah */
+  --color-soft-sage: #e8f1fa; /* Product/need cards / hover surface — tint diganti biru muda (dulu tint hijau) */
+  --color-terracotta: #a5482d; /* Accent / badge / selected highlight — TIDAK diubah, sengaja jadi pasangan komplemen hangat vs biru brand */
+  --color-terracotta-soft: #f2d9c8; /* Subtle accent background — jangan dipakai sebagai body text; tidak diubah */
+  --color-border: #dce2ea; /* Dividers / card border — tint diganti biru-abu */
+
+  /* --- Typography (Design System §3) ---
+     Font: Inter Variable dipilih dari 2 opsi yang diizinkan Design System
+     (Inter atau Manrope) — keputusan dicatat di
+     PROTOTYPE_STOREFRONT_PWA_README.md, bukan spesifikasi baru. */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* --- Layout & spacing (Design System §4) --- */
+  --container-content: 1240px; /* 1180–1240px desktop content container */
+  --radius-card: 18px; /* 16–20px card radius */
+}
+
+/* Selector spesifik (bukan cuma :root) supaya konsisten dengan pola yang
+   dipakai storefront Karyalo Store Manage — lihat catatan di
+   karyalo-theme.css proyek itu untuk alasan yang sama (menang atas
+   default browser/reset tanpa bergantung urutan stylesheet). */
+html body {
+  background-color: var(--color-warm-white);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Body copy per Design System §3: 17–18px desktop, 16–17px mobile */
+body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+  }
+}
+
+/* Focus state — visible, bukan hanya perubahan warna samar (Design System
+   §8 Accessibility). Nilai persis (warna/ketebalan outline) belum
+   ditentukan Design System sumber untuk komponen spesifik — ini baseline
+   generik yang aman, BUKAN spesifikasi final per-komponen. */
+:focus-visible {
+  outline: 2px solid var(--color-karyalo-green);
+  outline-offset: 2px;
+}
+
+/* Touch target minimum 44×44px (Design System §8) untuk elemen interaktif
+   yang memakai class ini — komponen individual bertanggung jawab
+   menerapkannya sesuai konteks masing-masing. */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}

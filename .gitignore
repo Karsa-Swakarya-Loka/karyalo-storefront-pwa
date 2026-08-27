@@ -1,0 +1,18 @@
+# deps
+node_modules/
+
+# next
+.next/
+out/
+build/
+
+# env
+.env.local
+.env*.local
+
+# misc
+.DS_Store
+*.pem
+*.key
+npm-debug.log*
+.vercel
