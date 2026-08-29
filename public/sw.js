@@ -1,26 +1,19 @@
 /**
- * Karyalo Storefront — service worker (PWA-03/PWA-04/PWA-05).
- *
- * Strategi sengaja sederhana untuk Fase 1 (Foundation):
- *   - Precache: app shell minimal (offline fallback page + manifest + icons).
- *   - Navigasi (HTML): network-first, fallback ke /offline saat gagal.
- *     TIDAK pernah menyajikan halaman /checkout dari cache — PWA-04
- *     eksplisit melarang "pretend to complete offline" untuk pembayaran.
- *   - Aset statis (_next/static, gambar, ikon): stale-while-revalidate —
- *     aman di-cache karena Next.js menamai file build dengan hash konten.
- *
- * Versioning cache manual lewat CACHE_NAME — naikkan angka versi ini tiap
- * kali strategi caching berubah, supaya klien lama tidak tersangkut di
- * cache basi (PWA-07 App Update).
+ * Karyalo Storefront — Service Worker (Production Only)
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `karyalo-shell-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline";
-
 const PRECACHE_URLS = [OFFLINE_URL, "/manifest.json"];
 
 self.addEventListener("install", (event) => {
+  // Bypassed on localhost
+  if (self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1") {
+    self.skipWaiting();
+    return;
+  }
+
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -30,6 +23,17 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
+  if (self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1") {
+    event.waitUntil(
+      caches
+        .keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .then(() => self.registration.unregister())
+        .then(() => self.clients.claim())
+    );
+    return;
+  }
+
   event.waitUntil(
     caches
       .keys()
@@ -50,16 +54,20 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Jangan pernah campur tangan pada request checkout/payment/API — harus
-  // selalu hit network langsung, tidak boleh disajikan dari cache basi.
+  // Jangan pernah intersepsi jika di localhost / dev atau API / checkout / HMR
   if (
+    self.location.hostname === "localhost" ||
+    self.location.hostname === "127.0.0.1" ||
     url.pathname.startsWith("/checkout") ||
-    url.pathname.startsWith("/api/")
+    url.pathname.startsWith("/api/") ||
+    url.pathname.includes("webpack-hmr") ||
+    url.pathname.includes("_next/webpack") ||
+    url.pathname.includes("__nextjs")
   ) {
     return;
   }
 
-  // Navigasi halaman (HTML): network-first, fallback offline page.
+  // Navigasi halaman: network-first, fallback offline
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() =>
@@ -69,7 +77,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Aset statis Next.js (nama file di-hash dari konten -> aman cache lama).
+  // Aset statis pada production live domain
   if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {

@@ -69,7 +69,7 @@ export const sendOrderPushNotification = internalAction({
     const order = await ctx.runQuery(api.orders.getById, { id: orderId });
     if (!order) return;
 
-    const subscriptions = await ctx.runQuery(internal.notifications.listSubscriptionsInternal, {});
+    const subscriptions = await ctx.runQuery((internal as any).notifications.listSubscriptionsInternal, {});
     if (subscriptions.length === 0) {
       console.warn("[Karyalo] Order baru masuk tapi belum ada admin yang subscribe push notification.");
       return;
@@ -84,7 +84,7 @@ export const sendOrderPushNotification = internalAction({
     });
 
     await Promise.all(
-      subscriptions.map(async (sub) => {
+      subscriptions.map(async (sub: any) => {
         try {
           await webpush.sendNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -95,7 +95,7 @@ export const sendOrderPushNotification = internalAction({
           if (statusCode === 404 || statusCode === 410) {
             // Subscription sudah tidak valid (browser di-uninstall/permission
             // dicabut) — nonaktifkan sesuai §16.4, bukan retry terus.
-            await ctx.runMutation(internal.notifications.deleteSubscriptionInternal, {
+            await ctx.runMutation((internal as any).notifications.deleteSubscriptionInternal, {
               id: sub._id,
             });
           } else {
@@ -123,8 +123,8 @@ export const sendTestPushNotification = action({
       throw new Error("VAPID belum di-set di Convex env — lihat CONVEX_SETUP.md.");
     }
 
-    const subscriptions = await ctx.runQuery(internal.notifications.listSubscriptionsInternal, {});
-    const sub = subscriptions.find((s) => s.endpoint === endpoint);
+    const subscriptions = await ctx.runQuery((internal as any).notifications.listSubscriptionsInternal, {});
+    const sub = subscriptions.find((s: any) => s.endpoint === endpoint);
     if (!sub) throw new Error("Device ini belum subscribe.");
 
     webpush.setVapidDetails("mailto:admin@karyalo.example", vapidPublicKey, vapidPrivateKey);

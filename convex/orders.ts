@@ -79,7 +79,7 @@ export const create = mutation({
     // kalau pengiriman push bermasalah. Action pengirim ada di file
     // terpisah (notificationActions.ts, bertanda "use node") karena
     // Convex melarang action Node dan mutation/query V8 isolate satu file.
-    await ctx.scheduler.runAfter(0, internal.notificationActions.sendOrderPushNotification, {
+    await ctx.scheduler.runAfter(0, (internal as any).notificationActions.sendOrderPushNotification, {
       orderId,
     });
 

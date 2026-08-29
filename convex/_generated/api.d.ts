@@ -9,6 +9,8 @@
  */
 
 import type * as categories from "../categories.js";
+import type * as notificationActions from "../notificationActions.js";
+import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as seed from "../seed.js";
@@ -21,6 +23,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   categories: typeof categories;
+  notificationActions: typeof notificationActions;
+  notifications: typeof notifications;
   orders: typeof orders;
   products: typeof products;
   seed: typeof seed;
